@@ -19,10 +19,16 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# تحميل خط عربي واضح للمانجا
-font_path = "Cairo-Bold.ttf"
+# تحميل خط عربي آمن ومباشر
+font_path = "Amiri-Bold.ttf"
 if not os.path.exists(font_path):
-    urllib.request.urlretrieve("https://github.com/googlefonts/cairo/raw/main/fonts/ttf/Cairo-Bold.ttf", font_path)
+    try:
+        url = "https://cdn.jsdelivr.net/gh/aliftype/amiri@master/sources/Amiri-Bold.ttf"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=10) as response, open(font_path, 'wb') as out_file:
+            out_file.write(response.read())
+    except Exception:
+        font_path = None
 
 @st.cache_resource
 def load_ocr():
@@ -81,9 +87,14 @@ if uploaded_file is not None:
                     reshaped = arabic_reshaper.reshape(ar_text)
                     bidi_text = get_display(reshaped)
                     font_size = max(12, int(h * 0.42))
-                    try:
-                        font = ImageFont.truetype(font_path, font_size)
-                    except:
+                    
+                    font = None
+                    if font_path and os.path.exists(font_path):
+                        try:
+                            font = ImageFont.truetype(font_path, font_size)
+                        except:
+                            font = ImageFont.load_default()
+                    else:
                         font = ImageFont.load_default()
 
                     draw.text((x + 5, y + int(h * 0.2)), bidi_text, fill=(0, 0, 0), font=font)
