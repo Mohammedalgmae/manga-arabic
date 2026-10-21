@@ -1,0 +1,7 @@
+easyocr
+opencv-python-headless
+pillow
+arabic-reshaper
+python-bidi
+deep-translator
+streamlit
